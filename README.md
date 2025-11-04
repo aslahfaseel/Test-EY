@@ -34,19 +34,16 @@ Before starting, ensure you have the following installed:
 
 1. **Terraform** (>= 1.0)
    ```bash
-   # Download from https://www.terraform.io/downloads.html
    terraform --version
    ```
 
 2. **AWS CLI** (>= 2.0)
    ```bash
-   # Installation: https://aws.amazon.com/cli/
    aws --version
    ```
 
 3. **kubectl** (>= 1.28)
    ```bash
-   # Installation: https://kubernetes.io/docs/tasks/tools/
    kubectl version --client
    ```
 
@@ -127,10 +124,8 @@ aws sts get-caller-identity
 Run the automated setup script:
 
 ```bash
-# Make the script executable
 chmod +x scripts/setup.sh
 
-# Run the setup
 ./scripts/setup.sh
 ```
 
@@ -162,24 +157,19 @@ node_max_size = 5
 #### Step 2: Deploy Infrastructure
 
 ```bash
-# Initialize Terraform
 terraform init
 
-# Review the plan
 terraform plan
 
-# Apply the configuration
 terraform apply
 ```
 
 #### Step 3: Configure kubectl
 
 ```bash
-# Get cluster name from Terraform output
 CLUSTER_NAME=$(terraform output -raw cluster_name)
 AWS_REGION=$(terraform output -raw region)
 
-# Update kubeconfig
 aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 ```
 
@@ -203,13 +193,11 @@ kubectl wait --for=condition=Available deployment/metrics-server -n kube-system 
 #### Step 6: Deploy Cluster Autoscaler
 
 ```bash
-# Get required values from Terraform
 cd terraform
 CLUSTER_NAME=$(terraform output -raw cluster_name)
 CLUSTER_AUTOSCALER_ROLE_ARN=$(terraform output -raw cluster_autoscaler_role_arn)
 cd ..
 
-# Deploy cluster autoscaler
 sed "s/\${CLUSTER_NAME}/$CLUSTER_NAME/g; s|\${CLUSTER_AUTOSCALER_ROLE_ARN}|$CLUSTER_AUTOSCALER_ROLE_ARN|g" \
     k8s-manifests/autoscaler/cluster-autoscaler.yaml | kubectl apply -f -
 ```
@@ -217,10 +205,8 @@ sed "s/\${CLUSTER_NAME}/$CLUSTER_NAME/g; s|\${CLUSTER_AUTOSCALER_ROLE_ARN}|$CLUS
 #### Step 7: Deploy Test Applications
 
 ```bash
-# Deploy nginx test application
 kubectl apply -f k8s-manifests/nginx-test/
 
-# Deploy Blue-Green demo application
 kubectl apply -f blue-green-deployment/
 ```
 
@@ -229,7 +215,6 @@ kubectl apply -f blue-green-deployment/
 ```bash
 kubectl apply -f jenkins/
 
-# Wait for Jenkins to be ready
 kubectl wait --for=condition=Available deployment/jenkins -n jenkins --timeout=600s
 ```
 
@@ -249,26 +234,20 @@ kubectl describe hpa nginx-test-hpa
 #### Generate Load to Trigger Scaling
 
 ```bash
-# Deploy load generator
 kubectl apply -f k8s-manifests/load-generator/load-test.yaml
 
-# Watch HPA in action
 kubectl get hpa -w
 
-# In another terminal, watch pods
 kubectl get pods -w
 ```
 
 #### Monitor Scaling Activity
 
 ```bash
-# Check current pod count
 kubectl get pods -l app=nginx-test
 
-# View HPA events
 kubectl describe hpa nginx-test-hpa
 
-# Check pod resource usage
 kubectl top pods -l app=nginx-test
 ```
 
@@ -445,4 +424,5 @@ kubectl describe hpa nginx-test-hpa
 # Cluster Autoscaler status
 kubectl get configmap cluster-autoscaler-status -n kube-system -o yaml
 ```
+
 
