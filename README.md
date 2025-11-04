@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # EY-Test
 DevOps Assignment 
 =======
@@ -6,7 +5,7 @@ DevOps Assignment
 
 This project demonstrates a complete AWS EKS (Elastic Kubernetes Service) infrastructure setup using Terraform, featuring auto-scaling capabilities and Jenkins-based blue-green deployment strategy.
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
@@ -19,7 +18,7 @@ This project demonstrates a complete AWS EKS (Elastic Kubernetes Service) infras
 - [Cleanup](#cleanup)
 - [Troubleshooting](#troubleshooting)
 
-## 🎯 Overview
+##  Overview
 
 This project includes:
 
@@ -29,35 +28,6 @@ This project includes:
 4. **Sample Application**: Nginx-based demo application for testing
 5. **Monitoring**: Metrics server for resource monitoring
 
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         AWS Cloud                            │
-│                                                               │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                  VPC (10.0.0.0/16)                   │   │
-│  │                                                       │   │
-│  │  ┌─────────────┐              ┌─────────────┐       │   │
-│  │  │   Public    │              │   Public    │       │   │
-│  │  │  Subnet 1   │              │  Subnet 2   │       │   │
-│  │  │             │              │             │       │   │
-│  │  │  NAT GW 1   │              │  NAT GW 2   │       │   │
-│  │  └──────┬──────┘              └──────┬──────┘       │   │
-│  │         │                             │              │   │
-│  │  ┌──────▼──────┐              ┌──────▼──────┐       │   │
-│  │  │   Private   │              │   Private   │       │   │
-│  │  │  Subnet 1   │              │  Subnet 2   │       │   │
-│  │  │             │              │             │       │   │
-│  │  │ ┌─────────┐ │              │ ┌─────────┐ │       │   │
-│  │  │ │EKS Node │ │              │ │EKS Node │ │       │   │
-│  │  │ └─────────┘ │              │ └─────────┘ │       │   │
-│  │  └─────────────┘              └─────────────┘       │   │
-│  │                                                       │   │
-│  │              EKS Control Plane                       │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
 
 Kubernetes Workloads:
 ├── Nginx Test App (with HPA)
@@ -67,7 +37,7 @@ Kubernetes Workloads:
 └── Metrics Server
 ```
 
-## ✅ Prerequisites
+##  Prerequisites
 
 Before starting, ensure you have the following installed:
 
@@ -120,7 +90,7 @@ Verify credentials:
 aws sts get-caller-identity
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -156,19 +126,10 @@ aws sts get-caller-identity
 │   ├── app-deployment.yaml         # Blue and Green deployments
 │   └── service.yaml                # Service configuration
 │
-├── scripts/                        # Helper scripts
-│   ├── setup.sh                    # Automated setup script
-│   └── cleanup.sh                  # Cleanup script
-│
-├── docs/                           # Additional documentation
-│   ├── SETUP_GUIDE.md
-│   ├── AUTO_SCALING.md
-│   └── BLUE_GREEN_DEPLOYMENT.md
-│
 └── README.md                       # This file
 ```
 
-## 🚀 Setup Instructions
+##  Setup Instructions
 
 ### Option 1: Automated Setup (Recommended)
 
@@ -281,7 +242,7 @@ kubectl apply -f jenkins/
 kubectl wait --for=condition=Available deployment/jenkins -n jenkins --timeout=600s
 ```
 
-## 📊 Auto-Scaling Demonstration
+##  Auto-Scaling Demonstration
 
 ### Horizontal Pod Autoscaling (HPA)
 
@@ -354,7 +315,7 @@ kubectl get nodes -w
 kubectl get events -n kube-system --sort-by='.lastTimestamp' | grep cluster-autoscaler
 ```
 
-## 🔵🟢 Blue-Green Deployment
+##  Blue-Green Deployment
 
 ### Understanding Blue-Green Deployment
 
@@ -442,7 +403,7 @@ The Jenkins pipeline performs:
 6. **Scale Down Old**: Scale down previous version
 7. **Rollback on Failure**: Automatic rollback if issues occur
 
-## 📈 Monitoring and Verification
+##  Monitoring and Verification
 
 ### Check Cluster Status
 
@@ -493,154 +454,3 @@ kubectl describe hpa nginx-test-hpa
 # Cluster Autoscaler status
 kubectl get configmap cluster-autoscaler-status -n kube-system -o yaml
 ```
-
-## 🧹 Cleanup
-
-### Automated Cleanup
-
-```bash
-chmod +x scripts/cleanup.sh
-./scripts/cleanup.sh
-```
-
-### Manual Cleanup
-
-```bash
-# Delete Kubernetes resources
-kubectl delete -f blue-green-deployment/
-kubectl delete -f jenkins/
-kubectl delete -f k8s-manifests/nginx-test/
-kubectl delete -f k8s-manifests/load-generator/
-kubectl delete -f k8s-manifests/autoscaler/
-
-# Wait for load balancers to be deleted
-sleep 60
-
-# Destroy Terraform infrastructure
-cd terraform
-terraform destroy
-```
-
-## 🔧 Troubleshooting
-
-### Pods Not Starting
-
-```bash
-# Describe pod to see events
-kubectl describe pod <pod-name>
-
-# Check pod logs
-kubectl logs <pod-name>
-
-# Check node resources
-kubectl describe nodes
-```
-
-### Load Balancer Not Created
-
-```bash
-# Check service events
-kubectl describe svc <service-name>
-
-# Verify AWS Load Balancer Controller
-kubectl get pods -n kube-system
-```
-
-### Cluster Autoscaler Not Working
-
-```bash
-# Check autoscaler logs
-kubectl logs -l app=cluster-autoscaler -n kube-system
-
-# Verify IAM role
-aws iam get-role --role-name <cluster-autoscaler-role>
-
-# Check node group tags
-aws eks describe-nodegroup --cluster-name <cluster-name> --nodegroup-name <nodegroup-name>
-```
-
-### HPA Not Scaling
-
-```bash
-# Check metrics server
-kubectl get apiservice v1beta1.metrics.k8s.io -o yaml
-
-# Verify metrics availability
-kubectl top pods
-
-# Check HPA status
-kubectl describe hpa <hpa-name>
-```
-
-### Jenkins Not Accessible
-
-```bash
-# Check Jenkins pod status
-kubectl get pods -n jenkins
-
-# Check service
-kubectl get svc jenkins -n jenkins
-
-# View logs
-kubectl logs -l app=jenkins -n jenkins
-```
-
-## 📝 Important Notes
-
-### Cost Considerations
-
-- EKS cluster costs approximately $0.10/hour ($72/month)
-- EC2 instances (t3.medium) cost approximately $0.0416/hour each
-- NAT Gateways cost $0.045/hour each ($32.40/month each)
-- Load Balancers cost approximately $0.0225/hour each
-- Total estimated cost: ~$200-250/month
-
-**Always destroy resources when not in use!**
-
-### Best Practices
-
-1. **Security**:
-   - Use private subnets for worker nodes
-   - Enable cluster logging
-   - Implement network policies
-   - Use IAM roles for service accounts (IRSA)
-
-2. **Monitoring**:
-   - Set up CloudWatch logging
-   - Configure alerts for cluster events
-   - Monitor resource usage regularly
-
-3. **Scaling**:
-   - Set appropriate resource requests/limits
-   - Configure HPA with reasonable thresholds
-   - Test auto-scaling before production use
-
-4. **Deployment**:
-   - Always test in non-production first
-   - Implement health checks
-   - Have rollback procedures ready
-   - Monitor deployments closely
-
-## 📚 Additional Resources
-
-- [EKS User Guide](https://docs.aws.amazon.com/eks/latest/userguide/)
-- [Kubernetes Documentation](https://kubernetes.io/docs/home/)
-- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [Jenkins Documentation](https://www.jenkins.io/doc/)
-- [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
-
-## 🤝 Contributing
-
-Feel free to submit issues and enhancement requests!
-
-## 📄 License
-
-This project is provided as-is for educational purposes.
-
----
-
-**Author**: Your Name  
-**Date**: November 2024  
-**Version**: 1.0
-
->>>>>>> 0c5b71a (Initial commit: EKS cluster with auto-scaling and blue-green deployment)
