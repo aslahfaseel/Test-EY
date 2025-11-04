@@ -28,15 +28,6 @@ This project includes:
 4. **Sample Application**: Nginx-based demo application for testing
 5. **Monitoring**: Metrics server for resource monitoring
 
-
-Kubernetes Workloads:
-├── Nginx Test App (with HPA)
-├── Blue-Green Demo App
-├── Jenkins (CI/CD)
-├── Cluster Autoscaler
-└── Metrics Server
-```
-
 ##  Prerequisites
 
 Before starting, ensure you have the following installed:
@@ -454,3 +445,4 @@ kubectl describe hpa nginx-test-hpa
 # Cluster Autoscaler status
 kubectl get configmap cluster-autoscaler-status -n kube-system -o yaml
 ```
+
